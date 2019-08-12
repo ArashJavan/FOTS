@@ -1,12 +1,4 @@
-import math
-import numpy as np
-import tensorflow as tf
-import tensorflow_hub as hub
-from cytoolz.itertoolz import _outer_join
-from dask.bag.core import groupby_tasks
 from tensorflow import keras
-import matplotlib.pyplot as plt
-import tensorflow_datasets
 
 
 class SharedConvlution(keras.Model):
@@ -68,6 +60,7 @@ class IdentityLayer(keras.layers.Layer):
         """
         return inputs[-1]
 
+
 class HLayer(keras.layers.Layer):
     """
     For more info about h- and  g-layers see
@@ -117,79 +110,4 @@ class HLayer(keras.layers.Layer):
 
         if self.activation is not None:
             output = self.activation_2(output)
-
         return output
-
-
-class Resnet50Wrapper():
-    layers_out = ["activation_9", "activation_21", "activation_39", "activation_48"]
-
-    def __init__(self, input_shape, **kwargs):
-        self._bb_model = keras.applications.resnet50.ResNet50(input_shape=input_shape, include_top=False)
-        self._bb_layers = [self._bb_model.get_layer(layer_name) for layer_name in self.layers_out]
-
-        bb_ouputs = [layer.output for layer in self._bb_layers]
-        self.model = keras.Model(inputs=self._bb_model.input, outputs=bb_ouputs)
-
-    def call(self, inputs, training=None, mask=None):
-        return self.model(inputs)
-
-    @property
-    def layers(self):
-        return self._bb_layers
-
-    def __call__(self, *args, **kwargs):
-        return self.call(*args, **kwargs)
-
-
-class TextDetector(keras.Model):
-    """
-    This is the detector-branch of the netwrok,
-    we use as in EAST sigmoid activations, since the output is normalized , out \in [0, 1]
-    """
-    def __init__(self, shared_features, input_shape, activation="sigmoid", **kwargs):
-        super(TextDetector, self).__init__(**kwargs)
-
-        self.text_scale = input_shape[0]
-        self.shared_featured = shared_features
-
-        self.score_conv = keras.layers.Conv2D(filters=1, kernel_size=1, padding="same", activation=activation)
-        self.geo_conv = keras.layers.Conv2D(filters=4, kernel_size=1, padding="same", activation=activation)
-        self.angle_conv = keras.layers.Conv2D(filters=4, kernel_size=1, padding="same", activation=activation)
-
-    def call(self, inputs, training=None, mask=None):
-        self.text_scale = self.input_shape[0]
-
-        outputs = self.shared_featured(inputs)
-        score_map = self.score_conv(outputs)
-        geo_map = self.geo_conv(outputs) * self.text_scale
-        angle_map = (self.angle_conv(outputs) - 0.5) * math.pi
-
-        return
-
-
-input_shape = (640, 640, 3)
-image_pathes = ["dog.jpg", "dog2.jpg"]
-images = []
-for img in image_pathes:
-    img_raw = tf.io.read_file(img)
-    img_tensor = tf.image.decode_image(img_raw)
-    img_final = tf.image.resize(img_tensor, [640, 640])
-    img_final = img_final / 255.0
-    images.append(img_final)
-images = tf.convert_to_tensor(images)
-# imgs = np.random.randn(2, 640, 640, 3).astype(np.float32)
-
-resnet50_wrapper = Resnet50Wrapper(input_shape=input_shape)
-shared_features = SharedConvlution(backbone=resnet50_wrapper)
-detector = TextDetector(shared_features=shared_features, input_shape=input_shape)
-Y = detector(images)
-
-fig, axs = plt.subplots(2, 2)
-axs = axs.flatten()
-for i in range(4):
-    img = tf.squeeze(Y[i])
-    axs[i].imshow(img[1, :, :])
-    axs[i].set_title(i)
-fig.tight_layout()
-plt.show()

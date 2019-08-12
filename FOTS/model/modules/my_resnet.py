@@ -120,7 +120,7 @@ class BasicBlock(keras.layers.Layer):
 #             norm_layer = keras.layers.BatchNormalization
 #         self._norm_layer = norm_layer
 #
-#         self.blocks = keras.models.Sequential(name='dynamic-blocks')
+#         self.blocks = keras.model.Sequential(name='dynamic-blocks')
 #
 #         self._activation = keras.activations.get(activation)
 #
@@ -167,7 +167,7 @@ class BasicBlock(keras.layers.Layer):
 #         return out
 #
 #     def _make_block_layer_(self, block, in_filters, out_filters, num_layers):
-#         layer_block = keras.models.Sequential(name='dynamic-blocks')
+#         layer_block = keras.model.Sequential(name='dynamic-blocks')
 #         for i in range(num_layers):
 #             layer_block.add(block(in_filters, out_filters))
 #             in_filters = out_filters
@@ -206,7 +206,7 @@ class ResNet(keras.Model):
         if conv1_max:
             self.conv1_block.add(keras.layers.MaxPool2D(pool_size=(3, 3), strides=2)) # out_shape = 1/4 in_shape
 
-        # self.blocks = keras.models.Sequential(name='dynamic-blocks')
+        # self.blocks = keras.model.Sequential(name='dynamic-blocks')
         self.blocks = []
         for block_arch in res_block_arch:
             blk = self._make_block(block_arch)
