@@ -19,7 +19,8 @@ class TextDetector(keras.Model):
 
     def call(self, inputs, training=None, mask=None):
         outputs = self.shared_featured(inputs)
-        score_map = self.score_conv(outputs)
+        score = self.score_conv(outputs)
         geo_map = self.geo_conv(outputs) * self.text_scale
         angle_map = (self.angle_conv(outputs) - 0.5) * math.pi  # theta \in [-90, 90]
-        return score_map, geo_map, angle_map
+        geometry = keras.layers.concatenate([geo_map, angle_map])
+        return score, geometry

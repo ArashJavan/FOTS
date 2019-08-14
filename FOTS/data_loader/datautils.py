@@ -152,7 +152,6 @@ def crop_area(im, polys, tags, crop_background = False, max_tries = 50):
         polys[:, :, 0] -= xmin
         polys[:, :, 1] -= ymin
         return im, polys, tags, selected_polys
-
     return im, polys, tags, np.array(len(polys))
 
 
