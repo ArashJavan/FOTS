@@ -1,7 +1,7 @@
 # FOTS
-This is the pytorch implementation of [FOTS: Fast Oriented Text Spotting with a Unified Network](https://arxiv.org/abs/1801.01671)
+This is the tensorflow implementation of [FOTS: Fast Oriented Text Spotting with a Unified Network](https://arxiv.org/abs/1801.01671)
 
-## Still under construction
+# Still under construction
 
 ```
 @misc{liu2018fots,
